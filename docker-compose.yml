@@ -1,0 +1,55 @@
+version: '2'
+# Compose-file for Wordpress
+# Maintainer: anton.latukha+dockerhub@gmail.com
+# Infrastructure uses:
+### Official nginx configured for external PHP7
+### Official wordpress+php:7.0-fpm on Alpine Linux
+### Official mariadb images
+
+services:
+  
+  web:
+    image: latukha/nginx-for-php-fpm
+    volumes:
+      - wpNxC:/etc/nginx/
+    ports:
+      - 80:80
+    links:
+      - app
+    volumes_from:
+      - app
+#    environment:
+#      - NGINX_PORT=80
+#      - NGINX_HOST=foobar.com
+
+# docker run --name some-nginx -v /some/nginx.conf:/etc/nginx/nginx.conf:ro -d nginx
+
+  app:
+    image: wordpress:php7.0-fpm-alpine
+    #4.6-
+    #-php7.0
+    volumes:
+      - wpD:/var/www/html
+    links:
+      - db:mysql
+    environment:
+      - WORDPRESS_DB_PASSWORD=my-secret-pw
+    
+  db:
+    image: mariadb:10.1
+    volumes:
+      - wpDB:/var/lib/mysql
+#    ports:
+#      - 8001:3306
+    environment:
+      - MYSQL_ROOT_PASSWORD=my-secret-pw
+# 3306
+volumes:
+  wpD:
+    driver: local
+  wpDB:
+    driver: local
+  wpNxC:
+    driver: local  
+
+# docker volume rm dcwordpress_wpD dcwordpress_wpDB dcwordpress_wpNxC
